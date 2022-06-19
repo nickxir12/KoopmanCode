@@ -1,0 +1,1218 @@
+<?xml version="1.0" ?>
+<!-- =================================================================================== -->
+<!-- |    This document was hand write by zhanchiwang      | -->
+<!-- =================================================================================== -->
+<robot name="2Dspiral" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Import Rviz colors -->
+  <material name="Black">
+    <color rgba="0.0 0.0 0.0 1.0"/>
+  </material>
+  <material name="Blue">
+    <color rgba="0.0 0.0 0.8 1.0"/>
+  </material>
+  <material name="Green">
+    <color rgba="0.0 0.8 0.0 1.0"/>
+  </material>
+  <material name="Grey">
+    <color rgba="0.4 0.4 0.4 1.0"/>
+  </material>
+  <material name="Orange">
+    <color rgba="1.0 0.4 0.04 1.0"/>
+  </material>
+  <material name="Brown">
+    <color rgba="0.8 0.8 0.76 1.0"/>
+  </material>
+  <material name="Red">
+    <color rgba="0.8 0.0 0.0 1.0"/>
+  </material>
+  <material name="White">
+    <color rgba="1.0 1.0 1.0 1.0"/>
+  </material>
+
+
+  <!--Import the 2Dspiral robot -->
+  <!-- Fix to world just for testing -->
+  <link name="world"/>
+  <!--2Dspiral-->
+
+  <!--Joint -->
+
+  <joint name="world_2Dspiral_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="world"/>
+    <child link="p24"/>
+  </joint>
+
+  <joint name="joint_1" type="revolute">
+    <parent link="p24"/>
+    <child link="p23"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0208906"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_2" type="revolute">
+    <parent link="p23"/>
+    <child link="p22"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0195239"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_3" type="revolute">
+    <parent link="p22"/>
+    <child link="p21"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0182466"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_4" type="revolute">
+    <parent link="p21"/>
+    <child link="p20"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0170529"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_5" type="revolute">
+    <parent link="p20"/>
+    <child link="p19"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0159373"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_6" type="revolute">
+    <parent link="p19"/>
+    <child link="p18"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0148947"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_7" type="revolute">
+    <parent link="p18"/>
+    <child link="p17"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0139203"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_8" type="revolute">
+    <parent link="p17"/>
+    <child link="p16"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0130096"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_9" type="revolute">
+    <parent link="p16"/>
+    <child link="p15"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0121585"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_10" type="revolute">
+    <parent link="p15"/>
+    <child link="p14"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0113631"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_11" type="revolute">
+    <parent link="p14"/>
+    <child link="p13"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0106197"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_12" type="revolute">
+    <parent link="p13"/>
+    <child link="p12"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0099250"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_13" type="revolute">
+    <parent link="p12"/>
+    <child link="p11"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0092757"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_14" type="revolute">
+    <parent link="p11"/>
+    <child link="p10"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0086688"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_15" type="revolute">
+    <parent link="p10"/>
+    <child link="p9"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0081017"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_16" type="revolute">
+    <parent link="p9"/>
+    <child link="p8"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0075717"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_17" type="revolute">
+    <parent link="p8"/>
+    <child link="p7"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0070764"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_18" type="revolute">
+    <parent link="p7"/>
+    <child link="p6"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0066134"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_19" type="revolute">
+    <parent link="p6"/>
+    <child link="p5"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0061808"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_20" type="revolute">
+    <parent link="p5"/>
+    <child link="p4"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0057764"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_21" type="revolute">
+    <parent link="p4"/>
+    <child link="p3"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0053985"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_22" type="revolute">
+    <parent link="p3"/>
+    <child link="p2"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0050453"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_23" type="revolute">
+    <parent link="p2"/>
+    <child link="p1"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0047153"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="300" lower="-0.5236" upper="0.5236" velocity="10"/>
+    <safety_controller k_position="100" k_velocity="2" soft_lower_limit="-0.52" soft_upper_limit="0.52"/>
+    <dynamics damping="0.5"/>
+  </joint>
+
+  <joint name="joint_ee" type="fixed">
+    <parent link="p1"/>
+    <child link="link_ee"/>
+    <origin rpy="0 0 0" xyz="0 0 0.0044068"/>
+  </joint>
+
+
+  <!--Link -->
+
+  <link name="p24">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.0208906"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p24.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.0208906"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p24.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+   <link name="p23">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p23.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p23.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p22">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.0195239"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p22.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.0195239"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p22.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p21">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.0377705"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p21.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.0377705"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p21.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p20">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.0548235"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p20.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.0548235"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p20.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p19">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.0707608"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p19.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.0707608"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p19.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p18">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.0856554"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p18.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.0856554"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p18.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p17">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.0995757"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p17.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.0995757"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p17.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p16">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.1125853"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p16.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.1125853"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p16.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p15">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.1247438"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p15.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.1247438"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p15.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p14">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.1361069"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p14.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.1361069"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p14.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p13">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.1467266"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p13.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.1467266"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p13.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p12">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.1566516"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p12.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.1566516"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p12.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p11">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.1659272"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p11.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.1659272"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p11.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p10">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.1745961"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p10.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.1745961"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p10.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p9">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.1826978"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p9.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.1826978"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p9.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p8">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.1902695"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p8.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.1902695"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p8.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p7">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.1973458"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p7.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.1973458"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p7.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p6">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.2039593"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p6.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.2039593"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p6.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p5">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.2101400"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p5.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.2101400"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p5.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p4">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.2159164"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p4.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.2159164"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p4.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p3">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.2213150"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p3.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.2213150"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p3.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p2">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.2263603"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p2.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.2263603"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p2.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="p1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.2310756"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/visual/p1.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.2310756"/>
+      <geometry>
+        <mesh filename="package://SSR_description/meshes/2Dspiral/collision/p1.stl"/>
+      </geometry>
+      <material name="Grey"/>
+    </collision>
+  </link>
+
+  <link name="link_ee">
+  </link>
+
+  <gazebo>
+    <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
+      <robotNamespace>/uj</robotNamespace>
+    </plugin>
+  </gazebo>
+  <gazebo reference="p24">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+   <gazebo reference="p23">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p22">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p21">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p20">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p19">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p18">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p17">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p16">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p15">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p14">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p13">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p12">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p11">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p10">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p9">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p8">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p7">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p6">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p5">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p4">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p3">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p2">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+  <gazebo reference="p1">
+    <material>Gazebo/Grey</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+
+  <transmission name="2Dspiral_tran_1">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_1">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_1">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_2">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_2">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_2">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_3">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_3">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_3">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_4">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_4">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_4">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_5">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_5">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_5">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_6">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_6">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_6">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_7">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_7">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_7">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_8">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_8">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_8">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_9">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_9">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_9">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_10">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_10">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_10">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_11">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_11">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_11">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_12">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_12">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_12">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_13">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_13">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_13">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_14">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_14">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_14">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_15">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_15">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_15">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_16">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_16">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_16">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_17">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_17">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_17">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_18">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_18">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_18">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_19">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_19">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_19">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_20">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_20">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_20">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_21">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_21">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_21">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_22">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_22">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_22">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="2Dspiral_tran_23">
+    <robotNamespace>/uj</robotNamespace>
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="joint_23">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor_23">
+      <hardwareInterface>PositionJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+</robot>
