@@ -103,6 +103,7 @@ class data_collecter:
             s0 = np.array([x0, th0, th1, dx0, dth0, dth1])
         return np.array(s0)
 
+    # Trajectories created here - used for Koopman operator training
     def collect_koopman_data(self, traj_num, steps, mode="train"):
         train_data = np.empty((steps + 1, traj_num, self.Nstates + self.udim))
         if self.env_name.startswith("Spirob"):
