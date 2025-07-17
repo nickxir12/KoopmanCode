@@ -126,14 +126,14 @@ def Eig_loss(net):
 
 def train(
     env_name,
-    train_steps=200000,
+    train_steps=2000,  # Was 200000
     suffix="",
     all_loss=0,
     encode_dim=12,
     layer_depth=3,
     e_loss=1,
     gamma=0.5,
-    Ktrain_samples=50000,
+    Ktrain_samples=500,  # Was 50000
 ):
 
     ASCII_LOG_ROOT = (
@@ -143,8 +143,8 @@ def train(
 
     # Ktrain_samples = 1000
     # Ktest_samples = 1000
-    Ktrain_samples = Ktrain_samples
-    Ktest_samples = 20000
+    Ktrain_samples = 500  # Ktrain_samples
+    Ktest_samples = 200  # Was 20000
     Ksteps = 15
     Kbatch_size = 100
     res = 1
@@ -220,13 +220,12 @@ def train(
         # ─── *** PRINT TO TERMINAL *** ─────────────────────
         if i % PRINT_EVERY == 0:
             # use .item() to get Python scalars
-            sys.stdout.write(
-                f"\rStep {i:>7}/{train_steps}  "
+            print(
+                f"Step {i:>7}/{train_steps}  "
                 f"loss: {loss.item():.4e}  "
                 f"Kloss: {Kloss.item():.4e}  "
-                f"Eloss: {Eloss.item():.4e}       "
+                f"Eloss: {Eloss.item():.4e}"
             )
-            sys.stdout.flush()
 
         if (i + 1) % eval_step == 0:
             # K loss

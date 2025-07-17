@@ -18,7 +18,7 @@ import os
 
 
 class SpirobEnv:
-    def __init__(self, xml_path="../../Spirob/2Dspiralrobot/2Dtendon10deg.xml"):
+    def __init__(self, xml_path="../Spirob/2Dspiralrobot/2Dtendon10deg.xml"):
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data = mujoco.MjData(self.model)
         self.dt = self.model.opt.timestep  # e.g., 0.002
@@ -27,6 +27,13 @@ class SpirobEnv:
         self.state_dim = self.model.nq + self.model.nv  # qpos + qvel
         self.umin = np.full(self.action_dim, self.model.actuator_ctrlrange[:, 0])
         self.umax = np.full(self.action_dim, self.model.actuator_ctrlrange[:, 1])
+
+        self.observation_space = spaces.Box(
+            low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32
+        )
+        self.action_space = spaces.Box(
+            low=self.umin, high=self.umax, shape=(self.action_dim,), dtype=np.float32
+        )
 
     def reset(self):
         self.data = mujoco.MjData(self.model)  # full reset
