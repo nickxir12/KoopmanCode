@@ -105,29 +105,6 @@ class data_collecter:
 
     def collect_koopman_data(self, traj_num, steps, mode="train"):
         train_data = np.empty((steps + 1, traj_num, self.Nstates + self.udim))
-            if mode.startswith("train"):
-                real_data = self.data[:500, :, :]
-            elif mode.startswith("eval"):
-                real_data = self.data[500:700, :, :]
-            else:
-                real_data = self.data[700:, :, :]
-            traj, traj_len, dim = real_data.shape
-            train_data = []
-            for i in range(traj):
-                traj_data = real_data[i, :, :]
-                end_index = np.where(traj_data[:, -1] == 1)[0]
-                if end_index.shape[0] > 0:
-                    end_index = end_index[0]
-                else:
-                    end_index = traj_len - 1
-                traj_num = (end_index + 1) // (steps + 1)
-                train_data_now = np.empty((steps + 1, traj_num, 17))
-                for j in range(traj_num):
-                    train_data_now[:, j, :] = traj_data[
-                        j * (steps + 1) : (j + 1) * (steps + 1), :17
-                    ]
-                train_data.append(train_data_now)
-            train_data = np.concatenate(train_data, axis=1)
         if self.env_name.startswith("Spirob"):
             for traj_i in range(traj_num):
                 s0 = self.env.reset()
