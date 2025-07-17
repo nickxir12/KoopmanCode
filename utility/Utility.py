@@ -18,9 +18,7 @@ import os
 
 
 class SpirobEnv:
-    def __init__(
-        self, xml_path="../Spirob/model_Spirob/2Dspiralrobot/2Dtendon10deg.xml"
-    ):
+    def __init__(self, xml_path="../../Spirob/2Dspiralrobot/2Dtendon10deg.xml"):
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data = mujoco.MjData(self.model)
         self.dt = self.model.opt.timestep  # e.g., 0.002

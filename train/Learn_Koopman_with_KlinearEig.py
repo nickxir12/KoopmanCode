@@ -167,6 +167,7 @@ def train(
     print("u_dim =", u_dim)
     print("Ktrain_data shape =", Ktrain_data.shape)
     print("First sample:", Ktrain_data[:, 0, :])
+    print("Sample input+state vector:", Ktrain_data[0, 0])
 
     # layer_depth = 4
     layer_width = 128
@@ -272,7 +273,7 @@ def main():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--env", type=str, default="Spirob")
+    parser.add_argument("--env", type=str, default="Spirob")  # DampingPendulum
     parser.add_argument("--suffix", type=str, default="5_2")
     parser.add_argument("--all_loss", type=int, default=1)
     parser.add_argument("--K_train_samples", type=int, default=50000)
