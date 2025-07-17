@@ -105,27 +105,6 @@ class data_collecter:
 
     def collect_koopman_data(self, traj_num, steps, mode="train"):
         train_data = np.empty((steps + 1, traj_num, self.Nstates + self.udim))
-        if self.env_name.startswith("Franka"):
-            for traj_i in range(traj_num):
-                noise = (np.random.rand(7) - 0.5) * 2 * 0.2
-                joint_init = self.reset_joint_state + noise
-                joint_init = np.clip(
-                    joint_init, self.env.joint_low, self.env.joint_high
-                )
-                s0 = self.env.reset_state(joint_init)
-                s0 = FrankaObs(s0)
-                u10 = (np.random.rand(7) - 0.5) * 2 * self.uval
-                train_data[0, traj_i, :] = np.concatenate(
-                    [u10.reshape(-1), s0.reshape(-1)], axis=0
-                ).reshape(-1)
-                for i in range(1, steps + 1):
-                    s0 = self.env.step(u10)
-                    s0 = FrankaObs(s0)
-                    u10 = (np.random.rand(7) - 0.5) * 2 * self.uval
-                    train_data[i, traj_i, :] = np.concatenate(
-                        [u10.reshape(-1), s0.reshape(-1)], axis=0
-                    ).reshape(-1)
-        elif self.env_name.startswith("Snake"):
             if mode.startswith("train"):
                 real_data = self.data[:500, :, :]
             elif mode.startswith("eval"):
@@ -149,7 +128,7 @@ class data_collecter:
                     ]
                 train_data.append(train_data_now)
             train_data = np.concatenate(train_data, axis=1)
-        elif self.env_name.startswith("Spirob"):
+        if self.env_name.startswith("Spirob"):
             for traj_i in range(traj_num):
                 s0 = self.env.reset()
                 u_t = np.random.uniform(self.umin, self.umax, size=self.udim)
