@@ -126,7 +126,7 @@ def Eig_loss(net):
 
 def train(
     env_name,
-    train_steps=2000,  # Was 200000
+    train_steps=1000,  # Was 200000
     suffix="",
     all_loss=0,
     encode_dim=12,
@@ -245,7 +245,18 @@ def train(
                 if loss < best_loss:
                     best_loss = copy(Kloss)
                     best_state_dict = copy(net.state_dict())
-                    Saved_dict = {"model": best_state_dict, "layer": layers}
+
+                    # Extract Koopman operators A and B (as numpy arrays)
+                    A = net.lA.weight.detach().cpu().numpy()
+                    B = net.lB.weight.detach().cpu().numpy()
+
+                    # Save everything into the checkpoint
+                    Saved_dict = {
+                        "model": best_state_dict,
+                        "layer": layers,
+                        "A": A,
+                        "B": B,
+                    }
                     torch.save(Saved_dict, os.path.join(logdir, "best_model.pth"))
 
                 print("Step:{} Eval-loss{} K-loss:{} ".format(i, loss, Kloss))
