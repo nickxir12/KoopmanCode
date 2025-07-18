@@ -24,7 +24,7 @@ class SpirobEnv:
         self.dt = self.model.opt.timestep  # e.g., 0.002
         self.sim_steps_per_control = 10  # you can change this
         self.action_dim = self.model.nu  # number of controls
-        self.state_dim = self.model.nq + self.model.nv  # qpos + qvel
+        self.state_dim = 21 + 21  # qpos + qvel
         self.umin = np.full(self.action_dim, self.model.actuator_ctrlrange[:, 0])
         self.umax = np.full(self.action_dim, self.model.actuator_ctrlrange[:, 1])
 
@@ -46,7 +46,10 @@ class SpirobEnv:
         return self.get_state(), 0.0, False, {}
 
     def get_state(self):
-        return np.concatenate([self.data.qpos, self.data.qvel])
+        # Remove first 7 qpos (free root), and first 6 qvel (root velocities)
+        qpos = self.data.qpos[7:]  # 21 joint positions
+        qvel = self.data.qvel[6:]  # 21 joint velocities
+        return np.concatenate([qpos, qvel])
 
 
 class data_collecter:
