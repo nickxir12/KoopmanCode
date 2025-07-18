@@ -35,6 +35,7 @@ def gaussian_init_(n_units, std=1):
 class Network(nn.Module):
     def __init__(self, encode_layers, Nkoopman, u_dim):
         super(Network, self).__init__()
+        # DEFINE ENCODING NETWORK BELOW
         Layers = OrderedDict()
         for layer_i in range(len(encode_layers) - 1):
             Layers["linear_{}".format(layer_i)] = nn.Linear(
@@ -126,7 +127,7 @@ def Eig_loss(net):
 
 def train(
     env_name,
-    train_steps=5000,  # Was 200000
+    train_steps=1000,  # Was 200000
     suffix="",
     all_loss=0,
     encode_dim=12,
@@ -143,7 +144,7 @@ def train(
 
     # Ktrain_samples = 1000
     # Ktest_samples = 1000
-    Ktrain_samples = 2000  # Ktrain_samples
+    Ktrain_samples = 500  # Ktrain_samples
     Ktest_samples = 200  # Was 20000
     Ksteps = 15
     Kbatch_size = 100
@@ -164,6 +165,7 @@ def train(
     in_dim = Ktest_data.shape[-1] - u_dim
     Nstate = in_dim
 
+    print("in_dim =", in_dim)
     print("u_dim =", u_dim)
     print("Ktrain_data shape =", Ktrain_data.shape)
     print("First sample:", Ktrain_data[:, 0, :])
@@ -173,6 +175,7 @@ def train(
     layer_width = 128
     layers = [in_dim] + [layer_width] * layer_depth + [encode_dim]
     Nkoopman = in_dim + encode_dim
+    print("Nkoopman =", Nkoopman)
     print("layers:", layers)
     net = Network(layers, Nkoopman, u_dim)
     # print(net.named_modules())
@@ -257,7 +260,7 @@ def train(
                         "A": A,
                         "B": B,
                     }
-                    torch.save(Saved_dict, ("../Spirob_checkpoints/best_model.pth"))
+                    torch.save(Saved_dict, ("../Spirob_checkpoints/best_model_v1.pth"))
 
                 print("Step:{} Eval-loss{} K-loss:{} ".format(i, loss, Kloss))
             # print("-------------END-------------")
@@ -289,7 +292,7 @@ if __name__ == "__main__":
     parser.add_argument("--K_train_samples", type=int, default=50000)
     parser.add_argument("--e_loss", type=int, default=0)
     parser.add_argument("--gamma", type=float, default=0.8)
-    parser.add_argument("--encode_dim", type=int, default=20)
+    parser.add_argument("--encode_dim", type=int, default=42)
     parser.add_argument("--layer_depth", type=int, default=3)
     args = parser.parse_args()
     main()
