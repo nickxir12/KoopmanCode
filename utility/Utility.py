@@ -106,33 +106,51 @@ class data_collecter:
             s0 = np.array([x0, th0, th1, dx0, dth0, dth1])
         return np.array(s0)
 
-    # Trajectories created here - used for Koopman operator training
     def collect_koopman_data(self, traj_num, steps, mode="train"):
         train_data = np.empty((steps + 1, traj_num, self.Nstates + self.udim))
+
         if self.env_name.startswith("Spirob"):
             for traj_i in range(traj_num):
+                # Reset environment
                 s0 = self.env.reset()
-                u_t = np.random.uniform(self.umin, self.umax, size=self.udim)
+
+                # Generate control amplitudes clamped to [0, 1]
+                if mode == "train":
+                    # For training, use random amplitudes in [0, 1]
+                    amp = np.random.uniform(0, 1)
+                else:
+                    # For evaluation, use fixed steps in [0, 1]
+                    amp = np.linspace(0, 1, steps)[0]  # Start with first value
+
+                # Create control signal with 0.25 ratio between right and left
+                u_t = np.zeros(self.udim)
+                u_t[0] = amp
+                u_t[1] = 0.25 * amp
+
+                # Store initial state with control
                 train_data[0, traj_i, :] = np.concatenate([u_t, s0])
+
                 for i in range(1, steps + 1):
+                    # Step the environment
                     s1, _, done, _ = self.env.step(u_t)
-                    u_t = np.random.uniform(self.umin, self.umax, size=self.udim)
+
+                    # Update control for next step
+                    if mode == "train":
+                        # For training, occasionally change the amplitude
+                        if np.random.rand() < 0.1:  # 10% chance to change amplitude
+                            amp = np.clip(np.random.uniform(0, 1), 0, 1)  # Ensure [0,1]
+                            u_t[0] = amp
+                            u_t[1] = 0.25 * amp
+                    else:
+                        # For evaluation, step through amplitudes in [0,1]
+                        if i < steps:  # Don't go out of bounds
+                            amp = np.linspace(0, 1, steps)[i]
+                            u_t[0] = amp
+                            u_t[1] = 0.25 * amp
+
+                    # Store the data
                     train_data[i, traj_i, :] = np.concatenate([u_t, s1])
-        else:
-            for traj_i in range(traj_num):
-                s0 = self.env.reset()
-                # s0 = self.random_state()
-                u10 = np.random.uniform(self.umin, self.umax)
-                # self.env.reset_state(s0)
-                train_data[0, traj_i, :] = np.concatenate(
-                    [u10.reshape(-1), s0.reshape(-1)], axis=0
-                ).reshape(-1)
-                for i in range(1, steps + 1):
-                    s0, r, done, _ = self.env.step(u10)
-                    u10 = np.random.uniform(self.umin, self.umax)
-                    train_data[i, traj_i, :] = np.concatenate(
-                        [u10.reshape(-1), s0.reshape(-1)], axis=0
-                    ).reshape(-1)
+
         return train_data
 
     def collect_detivative_data(self, traj_num, steps):
