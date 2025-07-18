@@ -1,0 +1,57 @@
+from spirob_env import SpirobEnv
+from Utility import data_collecter
+import torch
+import numpy as np
+import time
+
+# Load model
+model_path = "path/to/best_model.pth"
+checkpoint = torch.load(model_path)
+net = Network(checkpoint["layer"], Nkoopman=..., u_dim=2)  # Fill in correct u_dim
+net.load_state_dict(checkpoint["model"])
+net.eval()
+
+# Setup environment
+env = SpirobEnv()
+env.render = True  # Make sure visualization is turned on
+env.reset()
+
+# Get initial state
+s_t = env.get_state()
+u_dim = 2
+s_dim = 42  # angle + velocity
+
+# Create a rollout of real and predicted states
+real_states = []
+pred_states = []
+
+X_koop = net.encode(torch.DoubleTensor(s_t[:s_dim]).unsqueeze(0))
+
+for t in range(100):
+    # 1. Random or fixed control
+    u_t = np.random.uniform(env.umin, env.umax)
+    u_tensor = torch.DoubleTensor(u_t).unsqueeze(0)
+
+    # ----- TRUE DYNAMICS -----
+    s_t1, _, _, _ = env.step(u_t)
+    real_states.append(s_t1[:s_dim])
+    env.render()  # visualize
+    time.sleep(0.01)
+
+    # ----- KOOPMAN PREDICTION -----
+    with torch.no_grad():
+        X_koop = net.forward(X_koop, u_tensor)
+        pred_q = X_koop[0, :s_dim].detach().cpu().numpy()
+        pred_states.append(pred_q)
+
+# Visualize both paths:
+for qpos_true, qpos_pred in zip(real_states, pred_states):
+    # Visualize ground truth
+    env.data.qpos[:] = qpos_true[:env.model.nq]
+    mujoco.mj_forward(env.model, env.data)
+    time.sleep(0.01)
+
+    # Then visualize prediction
+    env.data.qpos[:] = qpos_pred[:env.model.nq]
+    mujoco.mj_forward(env.model, env.data)
+    time.sleep(0.01)
