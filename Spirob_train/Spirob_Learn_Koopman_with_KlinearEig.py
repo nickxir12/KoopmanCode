@@ -126,7 +126,7 @@ def Eig_loss(net):
 
 def train(
     env_name,
-    train_steps=1000,  # Was 200000
+    train_steps=5000,  # Was 200000
     suffix="",
     all_loss=0,
     encode_dim=12,
@@ -143,7 +143,7 @@ def train(
 
     # Ktrain_samples = 1000
     # Ktest_samples = 1000
-    Ktrain_samples = 500  # Ktrain_samples
+    Ktrain_samples = 2000  # Ktrain_samples
     Ktest_samples = 200  # Was 20000
     Ksteps = 15
     Kbatch_size = 100
@@ -257,7 +257,7 @@ def train(
                         "A": A,
                         "B": B,
                     }
-                    torch.save(Saved_dict, os.path.join(logdir, "best_model.pth"))
+                    torch.save(Saved_dict, ("../Spirob_checkpoints/best_model.pth"))
 
                 print("Step:{} Eval-loss{} K-loss:{} ".format(i, loss, Kloss))
             # print("-------------END-------------")

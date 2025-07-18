@@ -241,8 +241,8 @@
 </worldbody>
 
 <actuator>
-	<muscle name="A_1" ctrllimited="true"  lengthrange="0.1         0.4" ctrlrange="0  1" force="10" tendon="t1"/>
-	<muscle name="A_2" ctrllimited="true"  lengthrange="0.1         0.4" ctrlrange="0  1" force="10" tendon="t2"/>
+	<muscle name="A_1" ctrllimited="true"  lengthrange="0.1         0.4" ctrlrange="0  1" force="1000" tendon="t1"/>
+	<muscle name="A_2" ctrllimited="true"  lengthrange="0.1         0.4" ctrlrange="0  1" force="1000" tendon="t2"/>
 </actuator>
 <tendon>
 	<spatial name="t1" width="0.0004" frictionloss="0.1" rgba=".95 .3 .3 1" limited="true" range="0.1         0.4">
