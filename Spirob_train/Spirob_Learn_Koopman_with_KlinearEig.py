@@ -83,6 +83,13 @@ class Network(nn.Module):
 #     return np.array(max_loss_list), np.array(mean_loss_list)
 
 
+def angle_limit_penalty(angles_pred, low=-0.523, high=0.523):
+    # amount by which each prediction violates the box
+    low_violation = torch.relu(low - angles_pred)  # (< low)  → positive
+    high_violation = torch.relu(angles_pred - high)  # (> high) → positive
+    return torch.mean((low_violation**2 + high_violation**2))
+
+
 # loss function
 def Klinear_loss(data, net, mse_loss, u_dim=1, gamma=0.99, Nstate=4, all_loss=0):
     steps, train_traj_num, NKoopman = data.shape
@@ -103,6 +110,14 @@ def Klinear_loss(data, net, mse_loss, u_dim=1, gamma=0.99, Nstate=4, all_loss=0)
             loss += beta * mse_loss(X_current, Y)
         X_current_encoded = net.encode(X_current[:, :Nstate])
         Augloss += mse_loss(X_current_encoded, X_current)
+
+        # ------------------------------------------------------------------
+        # ❸ **angle-limit penalty**
+        # ------------------------------------------------------------------
+        angles_pred = X[:, :21]  # first 21 dims = joint angles
+        angle_pen = angle_limit_penalty(angles_pred)
+        loss += beta * lam_bound * angle_pen
+
         beta *= gamma
     loss = loss / beta_sum
     Augloss = Augloss / beta_sum
@@ -306,8 +321,8 @@ if __name__ == "__main__":
         "env_name": "Spirob",
         "dataset_dir": "./Spirob_Dataset/Spirob_Dataset_25steps_right_gt_left",
         "use_saved_dataset": True,  # <- NOW SET HERE
-        "train_steps": 5000,
-        "batch_size": 50,
+        "train_steps": 50000,
+        "batch_size": 100,
         "learning_rate": 5e-5,
         "layer_depth": 3,
         "layer_width": 128,
