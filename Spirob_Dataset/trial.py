@@ -1,54 +1,83 @@
+#!/usr/bin/env python3
+"""
+debug_simulator.py
+
+Run a short simulation of your SpirobEnv, print joint angles per step,
+plot them and save the figure to a PNG file for headless environments.
+"""
+import sys
 import numpy as np
-import mujoco
+import matplotlib
+import time
 
-# Replace this with the correct relative path to your XML
-XML_PATH = "../Spirob/2Dspiralrobot/2Dtendon10deg.xml_fixed.xml"
+# Use a non-interactive backend for headless environments
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
+sys.path.append("../utility/")
+from Utility import DataCollector  # Ensure correct import path
 
-def main():
-    # 1) Load model & data
-    model = mujoco.MjModel.from_xml_path(XML_PATH)
-    data = mujoco.MjData(model)
+from Utility import SpirobEnv
 
-    # 2) Find the 21 J-joint indices
-    joint_idxs = sorted(
-        mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
-        for i in range(model.njnt)
-        if (name := mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i))
-        and name.startswith("J")
-    )
-    joint_qpos_addrs = [model.jnt_qposadr[j] for j in joint_idxs]
-    joint_qvel_addrs = [model.jnt_dofadr[j] for j in joint_idxs]
+# === Configuration ===
+xml_path = "../Spirob/2Dspiralrobot/2Dtendon10deg.xml"  # MJCF file path
+steps = 20  # number of control steps
+sim_steps_per_control = 1  # fewer substeps → finer sampling
+output_fig = "joint_angles.png"  # saved plot file
+render = True  # toggle MuJoCo window
+slowdown = 200.0  # factor to slow visualization
 
-    # 3) Zero‐action test
-    reset_state = lambda: (mujoco.mj_forward(model, data), None)[1]
-    sim_steps = 10
-    zero_ctrl = np.zeros(model.nu)
+# === Initialize environment ===
+env = SpirobEnv(xml_path, sim_steps_per_control=sim_steps_per_control)
+# real simulation dt per control step = base timestep * substeps
+sim_dt = env.model.opt.timestep * env.sim_steps
+# scaled sleep time for visualization
+dt_vis = sim_dt * slowdown
+print(
+    f"Simulation dt per control (substeps={sim_steps_per_control}): {sim_dt:.4f}s, visualizing at dt={dt_vis:.4f}s"
+)
 
-    # Reset
-    reset_state()
-    q0 = np.array([data.qpos[a] for a in joint_qpos_addrs])
-    print("After reset (deg):", np.round(np.rad2deg(q0), 3))
+# small constant control input
+u = np.array([0.05, 0.10])  # safe within [umin, umax]
+print(f"Using constant control u={u}")
 
-    # Do a few steps
-    for step in range(1, 6):
-        data.ctrl[:] = zero_ctrl
-        for _ in range(sim_steps):
-            mujoco.mj_step(model, data)
-        qa = np.array([data.qpos[a] for a in joint_qpos_addrs])
-        print(f"Step {step} (deg):", np.round(np.rad2deg(qa), 3))
+# reset environment
+env.reset()
 
-    # 4) Try a constant nonzero control
-    u = np.array([0.3, 0.1])  # tune to your ctrl_dim
-    print("\nApplying constant control:", u)
-    reset_state()
-    for step in range(1, 6):
-        data.ctrl[:] = u
-        for _ in range(sim_steps):
-            mujoco.mj_step(model, data)
-        qa = np.array([data.qpos[a] for a in joint_qpos_addrs])
-        print(f"Step {step} (deg):", np.round(np.rad2deg(qa), 3))
+# === Optional MuJoCo passive viewer ===
+viewer = None
+if render:
+    try:
+        from mujoco.viewer import launch_passive
 
+        viewer = launch_passive(env.model, env.data)
+        print("Passive viewer launched")
+    except ImportError:
+        print("Passive viewer not available; continuing headless mode")
+        render = False
 
-if __name__ == "__main__":
-    main()
+# === Run simulation ===
+q_history = []
+for i in range(steps):
+    state, _, _, _ = env.step(u)
+    q = state[: env.state_dim // 2]
+    q_history.append(q)
+    print(f"step={i+1:02d}: q = {np.round(q, 3)}")
+
+    if render and viewer is not None:
+        viewer.sync(state_only=False)
+        time.sleep(dt_vis)
+
+# === Plot joint angles ===
+q_array = np.stack(q_history, axis=0)  # shape (steps, 21)
+plt.figure(figsize=(8, 5))
+for j in range(min(5, q_array.shape[1])):
+    plt.plot(q_array[:, j], label=f"J{j+1}")
+plt.xlabel("Step")
+plt.ylabel("Angle (rad)")
+plt.title("Joint Angles Over Time")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig(output_fig)
+print(f"Plot saved to {output_fig}")

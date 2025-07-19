@@ -40,7 +40,6 @@
 	<geom type="box" group="1" size="0.001 0.005 0.005" contype="0" conaffinity="0" rgba=".5 .5 .5 1"/>
 </body>
 <body name="B0" pos="0           0         0.5">
-	<joint class="freej"/>
 	<geom type="mesh" mesh="1" name="1" pos="0 0 0" euler="0 0 0" rgba="0.4 0.9 0.4 1"/>
 	<inertial pos="0.01275 0 0" quat="1 0 0 0" mass="0.01" diaginertia="0.00014562  0.00014562  0.00018288" />
 	<site name="s0_1" pos="0    -0.02107     0.00969" size="0.001       0.001       0.001"/>

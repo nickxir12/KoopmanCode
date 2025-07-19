@@ -7,6 +7,7 @@ from copy import copy
 from rbf import rbf
 from gym import spaces
 import sys
+import time
 
 sys.path.append("../franka")
 # data collect
@@ -22,142 +23,111 @@ import numpy as np
 
 
 # --- Environment Wrapper ---
+
+
 class SpirobEnv:
-    def __init__(self, xml_path, sim_steps_per_control=10):
-        # Load model
+    def __init__(self, xml_path, sim_steps_per_control=1):
+        # Load model and data
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data = mujoco.MjData(self.model)
-        self.sim_steps_per_control = sim_steps_per_control
+        self.sim_steps = sim_steps_per_control
 
-        # Locate hinge joints J1-J21
-        self.joint_idxs = sorted(
+        # List the 21 hinge joints by name
+        self.joint_names = [f"J{i}" for i in range(1, 22)]
+        self.joint_ids = [
             mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, name)
-            for name in (
-                mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i)
-                for i in range(self.model.njnt)
-            )
-            if name and name.startswith("J")
-        )
-        assert (
-            len(self.joint_idxs) == 21
-        ), f"Expected 21 joints, got {len(self.joint_idxs)}"
+            for name in self.joint_names
+        ]
 
-        # Map to addresses
-        self.joint_qpos_addrs = [self.model.jnt_qposadr[j] for j in self.joint_idxs]
-        self.joint_qvel_addrs = [self.model.jnt_dofadr[j] for j in self.joint_idxs]
+        # Addresses for qpos and qvel
+        self.qpos_addrs = [self.model.jnt_qposadr[j] for j in self.joint_ids]
+        self.qvel_addrs = [self.model.jnt_dofadr[j] for j in self.joint_ids]
 
-        # Control dims
-        self.action_dim = self.model.nu
+        # Actuator limits
         cr = self.model.actuator_ctrlrange
-        self.umin = cr[:, 0]
-        self.umax = cr[:, 1]
+        self.umin, self.umax = cr[:, 0].copy(), cr[:, 1].copy()
 
-        # State dim
-        self.state_dim = 42
+        # Dimensions
+        self.action_dim = self.model.nu
+        self.state_dim = len(self.qpos_addrs) + len(self.qvel_addrs)  # 21 + 21
 
     def reset(self):
+        # Reset simulation state
         self.data = mujoco.MjData(self.model)
         mujoco.mj_forward(self.model, self.data)
-        print("[DEBUG] Joint limits:", self.model.jnt_range[self.joint_idxs])
+        return self._get_state()
 
-        return self.get_state()
+    def step(self, u):
+        self.data.ctrl[:] = np.clip(u, self.umin, self.umax)
+        for _ in range(self.sim_steps):
+            mujoco.mj_step(self.model, self.data)
+        mujoco.mj_forward(self.model, self.data)
+        time.sleep(self.model.opt.timestep * 10)  # Slow down for visibility
+        return self._get_state(), 0.0, False, {}
 
-    def step(self, action):
-        self.data.ctrl[:] = np.clip(action, self.umin, self.umax)
-        for _ in range(self.sim_steps_per_control):
-            mujoco.mj_step1(self.model, self.data)
-            mujoco.mj_step2(self.model, self.data)
-        return self.get_state(), 0.0, False, {}
-
-    def get_state(self):
-        q = np.array([self.data.qpos[a] for a in self.joint_qpos_addrs])
-        qd = np.array([self.data.qvel[a] for a in self.joint_qvel_addrs])
-        state = np.concatenate([q, qd])
-        if not np.all(np.isfinite(state)):
-            raise RuntimeError("Non-finite state")
-        return state
+    def _get_state(self):
+        # Extract hinge positions and velocities
+        q = self.data.qpos[self.qpos_addrs].copy()
+        qd = self.data.qvel[self.qvel_addrs].copy()
+        return np.concatenate([q, qd])
 
 
-# --- Data Collector ---
+# Sample policy: constant u0<u1 for entire trajectory
+def right_greater_left_policy(_):
+    u0 = np.random.uniform(0.0, 0.2)
+    diff_choices = [0.02, 0.05, 0.1, 0.2, 0.4]
+    diff_probs = [0.3, 0.3, 0.2, 0.15, 0.05]
+    diff = np.random.choice(diff_choices, p=diff_probs)
+    u1 = np.clip(u0 + diff, u0 + 0.01, 0.6)
+    return np.array([u0, u1])
+
+
 class DataCollector:
-    def __init__(self, xml_path, sim_steps_per_control=10, seed=2022):
-        np.random.seed(seed)
+    def __init__(self, xml_path, sim_steps_per_control=1, seed=2022):
         random.seed(seed)
+        np.random.seed(seed)
         self.env = SpirobEnv(xml_path, sim_steps_per_control)
         self.state_dim = self.env.state_dim
         self.action_dim = self.env.action_dim
-        self.umin = self.env.umin
-        self.umax = self.env.umax
+        self.umin, self.umax = self.env.umin, self.env.umax
 
-    def collect_koopman_data(self, traj_num, steps, mode="train", input_policy=None):
+    def collect_koopman_data(
+        self, traj_num, steps, mode="train", input_policy=None, max_tries=1
+    ):
         D = self.action_dim + self.state_dim
         data = np.zeros((steps + 1, traj_num, D), dtype=np.float32)
+
         for t in range(traj_num):
             s = self.env.reset()
-            assert np.all(np.abs(s[:21]) <= 0.54 + 1e-6)
-            a = np.random.rand() if mode == "train" else 0.0
-            u = input_policy(a) if input_policy else np.array([a, 0.25 * a])
-            data[0, t] = np.hstack([u, s])
+            u = input_policy(None) if input_policy else np.array([0.05, 0.1])
+            u = np.clip(u, self.umin, self.umax)
+            traj = np.zeros((steps + 1, D), dtype=np.float32)
+            traj[0] = np.hstack([u, s])
+            if t % 100 == 0:
+                print(f"\n--- Trajectory {t} ---")
+                print(f"Step 0 | u = {u} | q = {s[:self.state_dim//2]}")
+
             for i in range(1, steps + 1):
-                s, _, _, _ = self.env.step(u)
-                if not np.all(np.abs(s[:21]) <= 0.54 + 1e-6):
-                    raise ValueError(f"OOB at t={t} i={i} deg={np.rad2deg(s[:21])}")
-                if mode == "train" and np.random.rand() < 0.1:
-                    a = np.random.rand()
-                elif mode != "train" and i < steps:
-                    a = i / (steps - 1)
+                if (t % 5 == 0) and (
+                    i % 1 == 0
+                ):  # show robot on every 100th trajectory
+                    # Step & show visual slowly
+                    s, _, _, _ = self.env.step(u)
+                    time.sleep(self.env.model.opt.timestep * 10)  # slow visual
                 else:
-                    a = None
-                if a is not None:
-                    u = input_policy(a) if input_policy else np.array([a, 0.25 * a])
-                data[i, t] = np.hstack([u, s])
+                    self.env.data.ctrl[:] = np.clip(u, self.umin, self.umax)
+                    for _ in range(self.env.sim_steps):
+                        mujoco.mj_step(self.env.model, self.env.data)
+                    mujoco.mj_forward(self.env.model, self.env.data)
+                    s = self.env._get_state()
+
+                q = s[: self.state_dim // 2]
+                # Clip joint angles to [-0.523, 0.523] (30 degrees)
+                q = np.clip(q, -0.523, 0.523)
+
+                traj[i] = np.hstack([u, s])
+                # print(f"Step {i} | u = {u} | q = {q}")
+
+            data[:, t, :] = traj
+
         return data
-
-    # def random_state(self):
-    #     if self.env_name.startswith("DampingPendulum"):
-    #         th0 = random.uniform(-2 * np.pi, 2 * np.pi)
-    #         dth0 = random.uniform(-8, 8)
-    #         s0 = np.array([th0, dth0])
-    #     elif self.env_name.startswith("Pendulum"):
-    #         th0 = random.uniform(-2 * np.pi, 2 * np.pi)
-    #         dth0 = random.uniform(-8, 8)
-    #         s0 = [th0, dth0]
-    #     elif self.env_name.startswith("CartPole"):
-    #         x0 = random.uniform(-4, 4)
-    #         dx0 = random.uniform(-8, 8)
-    #         th0 = random.uniform(-0.418, 0.418)
-    #         dth0 = random.uniform(-8, 8)
-    #         s0 = [x0, dx0, th0, dth0]
-    #     elif self.env_name.startswith("MountainCarContinuous"):
-    #         x0 = random.uniform(-0.1, 0.1)
-    #         th0 = random.uniform(-0.5, 0.5)
-    #         s0 = [x0, th0]
-    #     elif self.env_name.startswith("InvertedDoublePendulum"):
-    #         x0 = random.uniform(-0.1, 0.1)
-    #         th0 = random.uniform(-0.3, 0.3)
-    #         th1 = random.uniform(-0.3, 0.3)
-    #         dx0 = random.uniform(-1, 1)
-    #         dth0 = random.uniform(-6, 6)
-    #         dth1 = random.uniform(-6, 6)
-    #         s0 = np.array([x0, th0, th1, dx0, dth0, dth1])
-    #     return np.array(s0)
-
-    # def collect_detivative_data(self, traj_num, steps):
-    #     train_data = np.empty((steps + 1, traj_num, self.Nstates + self.udim))
-    #     for traj_i in range(traj_num):
-    #         # s0 = self.env.reset()
-    #         s0 = self.random_state()
-    #         u10 = np.random.uniform(self.umin, self.umax)
-    #         self.env.reset_state(s0)
-    #         # print(s0,np.array(u10))
-    #         # print(s0,u10)
-    #         train_data[0, traj_i, :] = np.concatenate(
-    #             [u10.reshape(-1), s0.reshape(-1)], axis=0
-    #         ).reshape(-1)
-    #         for i in range(1, steps + 1):
-    #             s0, r, done, _ = self.env.step(u10)
-    #             u10 = np.random.uniform(self.umin, self.umax)
-    #             train_data[i, traj_i, :] = np.concatenate(
-    #                 [u10.reshape(-1), s0.reshape(-1)], axis=0
-    #             ).reshape(-1)
-    #     return train_data
