@@ -17,96 +17,100 @@ from mujoco import MjModel, MjData
 import os
 
 
+import mujoco
+import numpy as np
+
+
+# --- Environment Wrapper ---
 class SpirobEnv:
-    def __init__(
-        self,
-        xml_path="../Spirob/2Dspiralrobot/2Dtendon10deg.xml",
-        sim_steps_per_control=10,
-    ):
+    def __init__(self, xml_path, sim_steps_per_control=10):
+        # Load model
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data = mujoco.MjData(self.model)
-        self.dt = self.model.opt.timestep  # e.g., 0.002
-        self.sim_steps_per_control = sim_steps_per_control  # you can change this
-        self.action_dim = self.model.nu  # number of controls
-        self.state_dim = 21 + 21  # qpos + qvel
-        self.umin = np.full(self.action_dim, self.model.actuator_ctrlrange[:, 0])
-        self.umax = np.full(self.action_dim, self.model.actuator_ctrlrange[:, 1])
+        self.sim_steps_per_control = sim_steps_per_control
 
-        self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(self.state_dim,), dtype=np.float32
+        # Locate hinge joints J1-J21
+        self.joint_idxs = sorted(
+            mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, name)
+            for name in (
+                mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i)
+                for i in range(self.model.njnt)
+            )
+            if name and name.startswith("J")
         )
-        self.action_space = spaces.Box(
-            low=self.umin, high=self.umax, shape=(self.action_dim,), dtype=np.float32
-        )
+        assert (
+            len(self.joint_idxs) == 21
+        ), f"Expected 21 joints, got {len(self.joint_idxs)}"
+
+        # Map to addresses
+        self.joint_qpos_addrs = [self.model.jnt_qposadr[j] for j in self.joint_idxs]
+        self.joint_qvel_addrs = [self.model.jnt_dofadr[j] for j in self.joint_idxs]
+
+        # Control dims
+        self.action_dim = self.model.nu
+        cr = self.model.actuator_ctrlrange
+        self.umin = cr[:, 0]
+        self.umax = cr[:, 1]
+
+        # State dim
+        self.state_dim = 42
 
     def reset(self):
-        self.data = mujoco.MjData(self.model)  # full reset
+        self.data = mujoco.MjData(self.model)
+        mujoco.mj_forward(self.model, self.data)
+        print("[DEBUG] Joint limits:", self.model.jnt_range[self.joint_idxs])
+
         return self.get_state()
 
     def step(self, action):
         self.data.ctrl[:] = np.clip(action, self.umin, self.umax)
         for _ in range(self.sim_steps_per_control):
-            mujoco.mj_step(self.model, self.data)
+            mujoco.mj_step1(self.model, self.data)
+            mujoco.mj_step2(self.model, self.data)
         return self.get_state(), 0.0, False, {}
 
     def get_state(self):
-        # Remove first 7 qpos (free root), and first 6 qvel (root velocities)
-        qpos = self.data.qpos[7:]  # 21 joint positions
-        qvel = self.data.qvel[6:]  # 21 joint velocities
-        return np.concatenate([qpos, qvel])
+        q = np.array([self.data.qpos[a] for a in self.joint_qpos_addrs])
+        qd = np.array([self.data.qvel[a] for a in self.joint_qvel_addrs])
+        state = np.concatenate([q, qd])
+        if not np.all(np.isfinite(state)):
+            raise RuntimeError("Non-finite state")
+        return state
 
 
-class data_collecter:
-    def __init__(self, env_name, sim_steps_per_control=10):
-        self.env_name = env_name
-        np.random.seed(2022)
-        random.seed(2022)
-        if self.env_name.startswith("Spirob"):
-            self.env = SpirobEnv(sim_steps_per_control=sim_steps_per_control)
-            self.Nstates = self.env.state_dim
-            self.udim = self.env.action_dim
-            self.umin = self.env.umin
-            self.umax = self.env.umax
+# --- Data Collector ---
+class DataCollector:
+    def __init__(self, xml_path, sim_steps_per_control=10, seed=2022):
+        np.random.seed(seed)
+        random.seed(seed)
+        self.env = SpirobEnv(xml_path, sim_steps_per_control)
+        self.state_dim = self.env.state_dim
+        self.action_dim = self.env.action_dim
+        self.umin = self.env.umin
+        self.umax = self.env.umax
 
     def collect_koopman_data(self, traj_num, steps, mode="train", input_policy=None):
-        data = np.empty((steps + 1, traj_num, self.Nstates + self.udim))
-
-        for traj_i in range(traj_num):
-            s0 = self.env.reset()
-
-            amp_seq = (
-                np.random.uniform(0, 1) if mode == "train" else np.linspace(0, 1, steps)
-            )
-            amp = amp_seq if isinstance(amp_seq, np.ndarray) else [amp_seq] * steps
-
-            # Initial input
-            u_t = (
-                input_policy(amp[0])
-                if input_policy
-                else np.array([amp[0], 0.25 * amp[0]])
-            )
-            data[0, traj_i, :] = np.concatenate([u_t, s0])
-
+        D = self.action_dim + self.state_dim
+        data = np.zeros((steps + 1, traj_num, D), dtype=np.float32)
+        for t in range(traj_num):
+            s = self.env.reset()
+            assert np.all(np.abs(s[:21]) <= 0.54 + 1e-6)
+            a = np.random.rand() if mode == "train" else 0.0
+            u = input_policy(a) if input_policy else np.array([a, 0.25 * a])
+            data[0, t] = np.hstack([u, s])
             for i in range(1, steps + 1):
-                s1, _, _, _ = self.env.step(u_t)
-
-                if mode == "train":
-                    if np.random.rand() < 0.1:
-                        new_amp = np.clip(np.random.uniform(0, 1), 0, 1)
-                        u_t = (
-                            input_policy(new_amp)
-                            if input_policy
-                            else np.array([new_amp, 0.25 * new_amp])
-                        )
+                s, _, _, _ = self.env.step(u)
+                if not np.all(np.abs(s[:21]) <= 0.54 + 1e-6):
+                    raise ValueError(f"OOB at t={t} i={i} deg={np.rad2deg(s[:21])}")
+                if mode == "train" and np.random.rand() < 0.1:
+                    a = np.random.rand()
+                elif mode != "train" and i < steps:
+                    a = i / (steps - 1)
                 else:
-                    if i < steps:
-                        a = amp[i]
-                        u_t = (
-                            input_policy(a) if input_policy else np.array([a, 0.25 * a])
-                        )
-
-                data[i, traj_i, :] = np.concatenate([u_t, s1])
-
+                    a = None
+                if a is not None:
+                    u = input_policy(a) if input_policy else np.array([a, 0.25 * a])
+                data[i, t] = np.hstack([u, s])
         return data
 
     # def random_state(self):

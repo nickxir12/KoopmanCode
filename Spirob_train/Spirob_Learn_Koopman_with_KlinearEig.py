@@ -34,7 +34,7 @@ def gaussian_init_(n_units, std=1):
 
 
 class Network(nn.Module):
-    def __init__(self, encode_layers, Nkoopman, u_dim):
+    def __init__(self, encode_layers, Lifted_dim, u_dim):
         super(Network, self).__init__()
         # DEFINE ENCODING NETWORK BELOW
         Layers = OrderedDict()
@@ -45,13 +45,13 @@ class Network(nn.Module):
             if layer_i != len(encode_layers) - 2:
                 Layers["relu_{}".format(layer_i)] = nn.ReLU()
         self.encode_net = nn.Sequential(Layers)
-        self.Nkoopman = Nkoopman
+        self.Lifted_dim = Lifted_dim
         self.u_dim = u_dim
-        self.lA = nn.Linear(Nkoopman, Nkoopman, bias=False)
-        self.lA.weight.data = gaussian_init_(Nkoopman, std=1)
+        self.lA = nn.Linear(Lifted_dim, Lifted_dim, bias=False)
+        self.lA.weight.data = gaussian_init_(Lifted_dim, std=1)
         U, _, V = torch.svd(self.lA.weight.data)
         self.lA.weight.data = torch.mm(U, V.t()) * 0.9
-        self.lB = nn.Linear(u_dim, Nkoopman, bias=False)
+        self.lB = nn.Linear(u_dim, Lifted_dim, bias=False)
 
     def encode_only(self, x):
         return self.encode_net(x)
@@ -92,7 +92,7 @@ def angle_limit_penalty(angles_pred, low=-0.523, high=0.523):
 
 # loss function
 def Klinear_loss(data, net, mse_loss, u_dim=1, gamma=0.99, Nstate=4, all_loss=0):
-    steps, train_traj_num, NKoopman = data.shape
+    steps, train_traj_num, Lifted_dim = data.shape
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     data = torch.DoubleTensor(data).to(device)
     X_current = net.encode(data[0, :, u_dim:])
@@ -212,12 +212,12 @@ def train(
 
     layer_width = layer_width
     layers = [in_dim] + [layer_width] * layer_depth + [encode_dim]
-    Nkoopman = in_dim + encode_dim
+    Lifted_dim = in_dim + encode_dim
     Nstate = in_dim
 
-    print("Nkoopman =", Nkoopman)
+    print("Lifted_dim =", Lifted_dim)
     print("layers:", layers)
-    net = Network(layers, Nkoopman, u_dim)
+    net = Network(layers, Lifted_dim, u_dim)
 
     if torch.cuda.is_available():
         net.cuda()

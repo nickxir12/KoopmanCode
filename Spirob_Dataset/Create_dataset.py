@@ -3,7 +3,7 @@ import os
 import sys
 
 sys.path.append("../utility/")
-from Utility import data_collecter  # Ensure correct import path
+from Utility import DataCollector  # Ensure correct import path
 
 
 def right_greater_left_policy(_):
@@ -27,36 +27,29 @@ def right_greater_left_policy(_):
 
 
 def save_koopman_dataset(
-    env_name,
-    Ktrain_samples=2000,
-    Ktest_samples=400,
-    Ksteps=25,
-    save_dir="./Spirob_Dataset",
-    sim_steps_per_control=10,
-    input_policy=None,
+    xml_path, save_dir, Ktrain, Ktest, Ksteps, sim_steps_per_control, input_policy
 ):
     os.makedirs(save_dir, exist_ok=True)
-
-    collector = data_collecter(env_name, sim_steps_per_control=sim_steps_per_control)
-    train_data = collector.collect_koopman_data(
-        Ktrain_samples, Ksteps, mode="train", input_policy=input_policy
+    collector = DataCollector(xml_path, sim_steps_per_control)
+    train = collector.collect_koopman_data(
+        Ktrain, Ksteps, mode="train", input_policy=input_policy
     )
-    test_data = collector.collect_koopman_data(
-        Ktest_samples, Ksteps, mode="eval", input_policy=input_policy
+    test = collector.collect_koopman_data(
+        Ktest, Ksteps, mode="eval", input_policy=input_policy
     )
-
-    np.save(os.path.join(save_dir, f"{env_name}_Ktrain_v1.npy"), train_data)
-    np.save(os.path.join(save_dir, f"{env_name}_Ktest_v1.npy"), test_data)
-    print(f"Datasets saved to {save_dir}")
+    np.save(os.path.join(save_dir, "Spirob_Ktrain.npy"), train)
+    np.save(os.path.join(save_dir, "Spirob_Ktest.npy"), test)
+    print("Datasets saved.")
 
 
 if __name__ == "__main__":
+    xml = "../Spirob/2Dspiralrobot/2Dtendon10deg.xml"
     save_koopman_dataset(
-        env_name="Spirob",
-        Ktrain_samples=2000,
-        Ktest_samples=400,
-        Ksteps=25,
-        save_dir="./Spirob_Dataset_25steps_right_gt_left",
+        xml,
+        "./Spirob_Dataset_consistent",
+        Ktrain=200,
+        Ktest=40,
+        Ksteps=32,
         sim_steps_per_control=10,
-        input_policy=right_greater_left_policy,
+        input_policy=None,
     )
