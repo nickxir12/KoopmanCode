@@ -11,6 +11,7 @@ import argparse
 import os
 from torch.utils.tensorboard import SummaryWriter
 import sys
+from pathlib import Path
 
 sys.path.append("../utility/")
 from scipy.integrate import odeint
@@ -125,73 +126,98 @@ def Eig_loss(net):
     return loss
 
 
+def load_or_collect_dataset(env_name, use_saved, Ktrain_samples, Ksteps):
+    if use_saved:
+        # resolve dataset folder relative to this script
+        ds = (
+            Path(__file__).resolve().parent.parent
+            / "Spirob_Dataset"
+            / "Spirob_Dataset_25steps_right_gt_left"
+        )
+        train_path = ds / f"{env_name}_Ktrain_v1.npy"
+        test_path = ds / f"{env_name}_Ktest_v1.npy"
+        if not train_path.exists() or not test_path.exists():
+            raise FileNotFoundError(f"Cannot find dataset in {ds!r}")
+
+        Ktrain = np.load(train_path)
+        Ktest = np.load(test_path)
+    else:
+        coll = data_collecter(env_name)
+        Ktrain = coll.collect_koopman_data(Ktrain_samples, Ksteps, mode="train")
+        Ktest = coll.collect_koopman_data(200, Ksteps, mode="eval")
+
+    # infer dims
+    coll = data_collecter(env_name)
+    u_dim = coll.udim
+    in_dim = Ktrain.shape[-1] - u_dim
+
+    return Ktrain, Ktest, u_dim, in_dim
+
+
 def train(
-    env_name,
-    train_steps=1000,  # Was 200000
-    suffix="",
-    all_loss=0,
-    encode_dim=12,
+    env_name="Spirob",
+    train_steps=1000,
+    batch_size=100,
+    learning_rate=5e-4,
+    layer_width=128,
     layer_depth=3,
+    encode_dim=12,
+    all_loss=0,
     e_loss=1,
     gamma=0.5,
-    Ktrain_samples=500,  # Was 50000
+    Ktrain_samples=500,
+    Ksteps=25,
+    use_saved_dataset=True,
+    dataset_dir="./Spirob_Dataset/Spirob_Dataset_25steps_right_gt_left",  # Selecte dataset directory
+    suffix="",
 ):
 
-    ASCII_LOG_ROOT = (
-        r"C:\Users\nikolas\Desktop\tensorboard_logs"  # make this once; outside OneDrive
-    )
+    print("\n=== Training Configuration ===")
+    for k, v in locals().items():
+        print(f"{k:>20}: {v}")
+    print("==============================\n")
+
+    ASCII_LOG_ROOT = r"C:\Users\nikolas\Desktop\tensorboard_logs"
     os.makedirs(ASCII_LOG_ROOT, exist_ok=True)
 
-    # Ktrain_samples = 1000
-    # Ktest_samples = 1000
-    Ktrain_samples = 500  # Ktrain_samples
-    Ktest_samples = 200  # Was 20000
     Ksteps = 15
-    Kbatch_size = 100
+    Kbatch_size = batch_size
     res = 1
     normal = 1
-    # data prepare
-    data_collect = data_collecter(env_name)
 
-    u_dim = data_collect.udim
-    Ktest_data = data_collect.collect_koopman_data(Ktest_samples, Ksteps, mode="eval")
-    Ktest_samples = Ktest_data.shape[1]
-    print("test data ok!,shape:", Ktest_data.shape)
-    Ktrain_data = data_collect.collect_koopman_data(
-        Ktrain_samples, Ksteps, mode="train"
+    Ktrain_data, Ktest_data, u_dim, in_dim = load_or_collect_dataset(
+        env_name, use_saved_dataset, Ktrain_samples, Ksteps
     )
-    print("train data ok!,shape:", Ktrain_data.shape)
-    Ktrain_samples = Ktrain_data.shape[1]
-    in_dim = Ktest_data.shape[-1] - u_dim
-    Nstate = in_dim
 
     print("in_dim =", in_dim)
     print("u_dim =", u_dim)
     print("Ktrain_data shape =", Ktrain_data.shape)
-    print("First sample:", Ktrain_data[:, 0, :])
+    print("5 Sample Inputs:", Ktrain_data[:1, :5, :2])  # Print first input
     print("Sample input+state vector:", Ktrain_data[0, 0])
 
-    # layer_depth = 4
-    layer_width = 128
+    layer_width = layer_width
     layers = [in_dim] + [layer_width] * layer_depth + [encode_dim]
     Nkoopman = in_dim + encode_dim
+    Nstate = in_dim
+
     print("Nkoopman =", Nkoopman)
     print("layers:", layers)
     net = Network(layers, Nkoopman, u_dim)
-    # print(net.named_modules())
-    eval_step = 1000
-    learning_rate = 1e-3
+
     if torch.cuda.is_available():
         net.cuda()
     net.double()
+
     mse_loss = nn.MSELoss()
-    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate, weight_decay=1e-5)
+
     for name, param in net.named_parameters():
         print("model:", name, param.requires_grad)
-    # train
-    eval_step = 1000
-    best_loss = 1000.0
+
+    best_loss = float("inf")
+
     best_state_dict = {}
+    eval_step = 1000
 
     logdir = os.path.join(
         ASCII_LOG_ROOT,
@@ -199,19 +225,21 @@ def train(
             env_name, layer_depth, encode_dim, e_loss, gamma, all_loss, Ktrain_samples
         ),
     )
-
-    os.makedirs(logdir, exist_ok=True)  # creates .../tensorboard_logs/KoopmanU_...
-    writer = SummaryWriter(log_dir=logdir)  # **only one call**
+    os.makedirs(logdir, exist_ok=True)
+    writer = SummaryWriter(log_dir=logdir)
 
     start_time = time.process_time()
+
     for i in range(train_steps):
-        # K loss
-        Kindex = list(range(Ktrain_samples))
+        # K loss — sample from the real data you loaded
+        num_trajs = Ktrain_data.shape[1]
+        Kindex = list(range(num_trajs))
         random.shuffle(Kindex)
-        X = Ktrain_data[:, Kindex[:Kbatch_size], :]
+        X = Ktrain_data[:, Kindex[:batch_size], :]
         Kloss = Klinear_loss(X, net, mse_loss, u_dim, gamma, Nstate, all_loss)
         Eloss = Eig_loss(net)
         loss = Kloss + Eloss if e_loss else Kloss
+
         # loss = Kloss
         optimizer.zero_grad()
         loss.backward()
@@ -271,28 +299,26 @@ def train(
     print("END-best_loss{}".format(best_loss))
 
 
-def main():
-    train(
-        args.env,
-        suffix=args.suffix,
-        all_loss=args.all_loss,
-        encode_dim=args.encode_dim,
-        layer_depth=args.layer_depth,
-        e_loss=args.e_loss,
-        gamma=args.gamma,
-        Ktrain_samples=args.K_train_samples,
-    )
-
-
+# ---------------- main -----------------
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--env", type=str, default="Spirob")  # DampingPendulum
-    parser.add_argument("--suffix", type=str, default="5_2")
-    parser.add_argument("--all_loss", type=int, default=1)
-    parser.add_argument("--K_train_samples", type=int, default=50000)
-    parser.add_argument("--e_loss", type=int, default=0)
-    parser.add_argument("--gamma", type=float, default=0.8)
-    parser.add_argument("--encode_dim", type=int, default=42)
-    parser.add_argument("--layer_depth", type=int, default=3)
-    args = parser.parse_args()
-    main()
+    # Define all training arguments here in Python
+    training_args = {
+        "env_name": "Spirob",
+        "dataset_dir": "./Spirob_Dataset/Spirob_Dataset_25steps_right_gt_left",
+        "use_saved_dataset": True,  # <- NOW SET HERE
+        "train_steps": 5000,
+        "batch_size": 50,
+        "learning_rate": 5e-5,
+        "layer_depth": 3,
+        "layer_width": 128,
+        "encode_dim": 44,
+        "gamma": 0.5,
+        "all_loss": 0,
+        "e_loss": 1,
+        "Ktrain_samples": 5000,
+        "Ksteps": 25,
+        "suffix": "",
+    }
+
+    # Call training with these arguments
+    train(**training_args)
